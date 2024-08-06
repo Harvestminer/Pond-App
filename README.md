@@ -1,4 +1,4 @@
-# ASP.NET Application Project
+# ASP.NET PondApp Project
 
 ## Overview
 This project is an ASP.NET application being developed by Tyler Wesley. The goal of this project is to leverage the ASP.NET framework to build a robust and scalable web application.
