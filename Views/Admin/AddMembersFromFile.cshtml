@@ -1,0 +1,22 @@
+﻿@model AddMembersFromFileViewModel
+
+@{
+	Layout = "~/Views/Shared/_AdminLayout.cshtml";
+	ViewData["Title"] = "Create Member";
+}
+
+
+@using (Html.BeginForm("AddMembersFromFile", "Admin", FormMethod.Post, new { enctype = "multipart/form-data" })) {
+	@Html.AntiForgeryToken()
+	@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+	<div class="mb-3">
+
+		@Html.LabelFor(model => model.JsonFile, "Upload File", htmlAttributes: new { @class = "control-label" })
+		@Html.TextBoxFor(model => model.JsonFile, "", new { @type = "file", @class = "form-control" })
+
+		<div class="form-text">Upload a json file e.g. (whitelist.json)</div>
+	</div>
+	
+	<input type="submit" value="Submit" />
+}

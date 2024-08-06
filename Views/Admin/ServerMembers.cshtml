@@ -1,0 +1,62 @@
+﻿@model AdminViewModel
+
+@{
+	Layout = "~/Views/Shared/_AdminLayout.cshtml";
+	ViewData["Title"] = "Server Members";
+}
+
+<h2 class="display-6">Server Members (@Model.MemberCount)</h2>
+
+@using (Html.BeginForm())
+{
+	<div class="md-3 d-flex">
+		@Html.TextBox("SearchString", string.Empty, new { @class = "form-control m-3", @placeholder = "Search by Minecraft or Discord Username..." })
+		<button type="submit" class="btn btn-primary m-3">Search</button>
+	</div>
+}
+
+<div class="d-flex justify-content-between">
+	<p>@Html.ActionLink("Create New Server Member", "CreateMember")</p>
+	<p>@Html.ActionLink("Add Server Members From File", "AddMembersFromFile")</p>
+	<p>@Html.ActionLink("Download Minecraft Whitelist", "DownloadWhitelist")</p>
+</div>
+
+<table cellpadding="10" border="1" class="table">
+	<thead>
+		<tr>
+			<th>*</th>
+			<th>@Html.ActionLink("Minecraft", "ServerMembers", "Admin", new { sortOrder = ViewBag.MinecraftSortParm })</th>
+			<th>@Html.ActionLink("Discord", "ServerMembers", "Admin", new { sortOrder = ViewBag.DiscordSortParm })</th>
+			<th>@Html.ActionLink("Date Added", "ServerMembers", "Admin", new { sortOrder = ViewBag.DateSortParm })</th>
+			<th>@Html.ActionLink("Date Modified", "ServerMembers", "Admin", new { sortOrder = ViewBag.DateModSortParm })</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		@foreach (var member in Model.Members)
+		{
+			<tr>
+				<td>.</td>
+				<td title="@member.MinecraftUUID">@member.MinecraftUsername</td>
+				<td title="@member.DiscordUUID">@member.DiscordUsername</td>
+				<td>@member.DateAdded</td>
+				<td>@if (member.DateModified.HasValue)
+					{
+						@member.DateModified
+					}
+					else
+					{
+						<span>No Date Modified</span>
+					}
+				</td>
+				<td>
+					<a asp-action="EditMember" asp-route-id="@member.MemberId" class="btn btn-primary">Edit</a>
+					<a asp-action="RemoveMember" asp-route-id="@member.MemberId" class="btn btn-primary" onclick="return confirmDelete()">Remove</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<p class="text-sm-start">Showing @Model.Members.Count results.</p>

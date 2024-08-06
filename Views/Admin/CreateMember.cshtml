@@ -1,0 +1,27 @@
+﻿@model CreateMemberViewModel
+
+@{
+	Layout = "~/Views/Shared/_AdminLayout.cshtml";
+	ViewData["Title"] = "Create Member";
+}
+
+@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+<h2 class="display-6">Create a New Member</h2>
+
+<form asp-action="CreateMember" asp-controller="Admin" method="post">
+	<div class="mb-3">
+		<label for="mcname" class="form-label">Minecraft Username:</label>
+		<input asp-for="Member.MinecraftUsername" type="text" id="mcname" name="minecraftusername" placeholder="minecraft name" class="form-control" required />
+		<div class="form-text">Please enter a valid Minecraft username.</div>
+	</div>
+	<div class="mb-3">
+		<label for="discname" class="form-label">Discord Username:</label>
+		<input asp-for="Member.DiscordUsername" type="text" id="discname" name="discordusername" placeholder="discord name" class="form-control" required />
+	</div>
+	<div class="mb-3">
+		<label for="discuuid" class="form-label">Discord UUID:</label>
+		<input asp-for="Member.DiscordUUID" type="text" id="discuuid" name="discorduuid" class="form-control" placeholder="discord uuid" />
+	</div>
+	<button type="submit" class="btn btn-primary">Submit</button>
+</form>

@@ -1,0 +1,23 @@
+﻿@model LoginViewModel
+
+@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+	<h1 class="display-4" style="margin:0 0 20% 0;">Welcome to the Pond App!</h1>
+</div>
+
+<h3 class="display-6">Admin Login:</h3>
+@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+<form asp-action="Index" asp-controller="Login" method="post" style="padding:10px;">
+	<div class="mb-3">
+		<label asp-for="Admin.Username" class="form-label">Username:</label>
+		<input asp-for="Admin.Username" type="text" name="username" class="form-control" />
+	</div>
+	<div class="mb-3">
+		<label asp-for="Admin.Password" class="form-label">Password:</label>
+		<input asp-for="Admin.Password" type="password" name="password" class="form-control" />
+	</div>
+	<input type="submit" value="Login" />
+</form>
