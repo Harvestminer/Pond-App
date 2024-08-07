@@ -11,7 +11,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<AdminService>();
 builder.Services.AddTransient<MemberService>();
 builder.Services.AddHttpClient<MinecraftService>();
-builder.Services.AddHttpClient<DiscordService>();
+builder.Services.AddSingleton<DiscordService>();
+builder.Services.AddHostedService<DiscordService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>
@@ -53,3 +54,4 @@ var dbContext = scope.ServiceProvider.GetRequiredService<PondDBContext>();
 dbContext.Database.Migrate();
 
 app.Run();
+

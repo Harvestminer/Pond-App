@@ -1,38 +1,78 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Discord;
+using Discord.WebSocket;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 
 namespace PondWebApp.Services
 {
-	public class DiscordService(HttpClient httpClient, string botToken)
+	public class DiscordService(ILogger<DiscordService> logger, IServiceScopeFactory serviceScopeFactory) : IHostedService
 	{
-		private readonly HttpClient _httpClient = httpClient;
-		private readonly string _botToken = botToken;
+		private readonly ILogger<DiscordService> _logger = logger;
+		private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+		private DiscordSocketClient? _client;
 
-		/// <summary>
-		/// Get Discord user id from Discord username
-		/// </summary>
-		/// <param name="username"></param>
-		/// <returns></returns>
-		public async Task<string?> GetUserIdByUsernameAsync(string username)
+		public async Task StartAsync(CancellationToken cancellationToken)
 		{
-			var url = "https://discord.com/api/v10/users/@me";
+			_client = new DiscordSocketClient();
+			_client.Log += Log;
 
-			try
+			var token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
+
+			if (string.IsNullOrEmpty(token))
 			{
-				_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bot", _botToken);
-				var response = await _httpClient.GetStringAsync(url);
-				var user = JObject.Parse(response);
-
-				// Extract the user ID from the response
-				var userId = user["id"]?.ToString();
-
-				return userId;
+				_logger.LogError("Error: DISCORD_TOKEN environment variable is not set.");
+				return;
 			}
-			catch (Exception ex)
+
+			await _client.LoginAsync(TokenType.Bot, token);
+			await _client.StartAsync();
+
+			
+			_logger.LogInformation("Discord bot started.");
+
+			_client.Ready += IsReady;
+			_client.UserLeft += UserLeft;
+		}
+
+		public async Task IsReady()
+		{
+			var channel = _client.GetChannel(1270606722452553738) as ITextChannel;
+
+			if (channel != null)
 			{
-				Console.WriteLine($"Error fetching user ID: {ex.Message}");
-				return null;
+				await channel.SendMessageAsync("# Discord PondApp has started!\nListening for:\n- If a user leaves.\n- If a new application comes in.");
 			}
+		}
+
+		public async Task UserLeft(SocketGuild guild, SocketUser user)
+		{
+			using var scope = _serviceScopeFactory.CreateScope();
+			var memberService = scope.ServiceProvider.GetRequiredService<MemberService>();
+
+			await memberService.HandleUserLeft(user.Id);
+
+			if (this._client == null)
+				return;
+
+			if (_client.GetChannel(1270606722452553738) is ITextChannel channel)
+			{
+				await channel.SendMessageAsync($"{user.Username} was removed from the Pond database.");
+			}
+		}
+
+		public Task StopAsync(CancellationToken cancellationToken)
+		{
+			if (this._client == null)
+				return Task.CompletedTask;
+
+			_logger.LogInformation("Discord bot stopping.");
+			return this._client.StopAsync();
+		}
+
+		private Task Log(LogMessage message)
+		{
+			_logger.LogInformation(message.ToString());
+			return Task.CompletedTask;
 		}
 	}
 }

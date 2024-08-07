@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Discord;
+using Microsoft.EntityFrameworkCore;
 
 namespace PondWebApp.Services
 {
@@ -88,6 +89,17 @@ namespace PondWebApp.Services
 			{
 				this._dbContext.Members.Remove(result);
 				await this._dbContext.SaveChangesAsync();
+			}
+		}
+
+		public async Task HandleUserLeft(ulong id)
+		{
+			var members = await GetAllMembers();
+			var member = members.Where(x => x.DiscordUUID == id.ToString()).SingleOrDefault();
+
+			if (member != null)
+			{
+				await RemoveMember(member.MemberId);
 			}
 		}
 	}
